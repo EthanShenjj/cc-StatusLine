@@ -14,7 +14,19 @@ A custom status bar plugin for **Claude Code** that displays real-time token usa
 
 ---
 
-## Installation (安装步骤)
+## Quick Install (快速安装)
+
+Copy and paste this one-liner into your terminal to download and configure the plugin in seconds:
+
+```bash
+git clone https://github.com/EthanShenjj/cc-StatusLine.git ~/.claude/plugins/cc-StatusLine && node ~/.claude/plugins/cc-StatusLine/cc-status.js setup
+```
+
+After running the command and entering your credentials, simply add the plugin to your Claude Code settings as described below.
+
+---
+
+## Installation (详细安装步骤)
 
 ### 1. Clone the plugin
 First, clone this repository into your Claude Code plugins directory:
