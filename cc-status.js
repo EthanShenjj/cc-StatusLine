@@ -130,6 +130,7 @@ function render(data, isStale = false) {
   
   const usedPercent = total_granted > 0 ? ((total_used / total_granted) * 100).toFixed(1) : '0';
   const availPercent = total_granted > 0 ? ((total_available / total_granted) * 100).toFixed(1) : '0';
+  const balance = ((total_available / 1000000) * 2).toFixed(2);
   
   let percentColor = COLORS.green;
   if (usedPercent > 80) percentColor = COLORS.yellow;
@@ -140,7 +141,8 @@ function render(data, isStale = false) {
   process.stdout.write(
     `${COLORS.dim}Usage:${COLORS.reset} ${percentColor}${usedPercent}%${COLORS.reset} ` +
     `${COLORS.magenta}|${COLORS.reset} ` +
-    `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${availPercent}%${COLORS.reset}${staleMark}\n`
+    `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${availPercent}%${COLORS.reset} ` +
+    `${COLORS.dim}($${balance})${COLORS.reset}${staleMark}\n`
   );
 }
 
