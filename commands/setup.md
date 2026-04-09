@@ -8,7 +8,13 @@ allowed-tools: Bash, Read, Edit, AskUserQuestion
 Use this command to configure your token usage API key and status bar.
 
 ### Step 1: Detect Environment
-Identify the node runtime and script path.
+Run these commands to find the paths for your configuration.
+
+```bash
+# Get the absolute path to cc-status.js
+export CC_SCRIPT_PATH=$(pwd)/cc-status.js
+echo "Detected script path: $CC_SCRIPT_PATH"
+```
 
 ### Step 2: Request Token
 Ask the user for their API Bearer Token.
@@ -27,7 +33,7 @@ Ensure `~/.claude/settings.json` is updated to include the status bar:
 {
   "statusLine": {
     "type": "command",
-    "command": "node <FULL_PATH_TO_SCRIPT>/cc-status.js"
+    "command": "node $CC_SCRIPT_PATH"
   }
 }
 ```
