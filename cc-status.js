@@ -127,21 +127,20 @@ async function getStatus() {
 
 function render(data, isStale = false) {
   const { total_used, total_available, total_granted } = data;
-  const usedStr = formatTokens(total_used);
-  const availStr = formatTokens(total_available);
-  const grantedStr = formatTokens(total_granted);
   
-  const percent = total_granted > 0 ? ((total_used / total_granted) * 100).toFixed(1) : '0';
+  const usedPercent = total_granted > 0 ? ((total_used / total_granted) * 100).toFixed(1) : '0';
+  const availPercent = total_granted > 0 ? ((total_available / total_granted) * 100).toFixed(1) : '0';
+  
   let percentColor = COLORS.green;
-  if (percent > 80) percentColor = COLORS.yellow;
-  if (percent > 95) percentColor = COLORS.red;
+  if (usedPercent > 80) percentColor = COLORS.yellow;
+  if (usedPercent > 95) percentColor = COLORS.red;
 
   const staleMark = isStale ? ` ${COLORS.yellow}(stale)${COLORS.reset}` : '';
   
   process.stdout.write(
-    `${COLORS.dim}Usage:${COLORS.reset} ${percentColor}${usedStr}${COLORS.reset} / ${grantedStr} (${percentColor}${percent}%${COLORS.reset}) ` +
+    `${COLORS.dim}Usage:${COLORS.reset} ${percentColor}${usedPercent}%${COLORS.reset} ` +
     `${COLORS.magenta}|${COLORS.reset} ` +
-    `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${availStr}${COLORS.reset}${staleMark}\n`
+    `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${availPercent}%${COLORS.reset}${staleMark}\n`
   );
 }
 
