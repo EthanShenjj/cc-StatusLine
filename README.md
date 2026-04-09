@@ -34,9 +34,7 @@ Run the built-in setup command to configure your API Token and URL:
 node cc-status.js setup
 ```
 
-Follow the prompts to enter:
-- **API Bearer Token**: Your private authorization token.
-- **API URL**: The endpoint for token usage (default values are provided).
+Follow the prompts to enter your API credentials.
 
 ### 3. Enable the Status Bar
 To make the status bar visible in Claude Code, you need to add it to your global Claude settings.
@@ -65,7 +63,7 @@ Once installed, the status line will automatically update every time you run a c
 
 - `node cc-status.js`: Displays current usage (used by the status bar).
 - `node cc-status.js setup`: Opens the interactive configuration tool.
-- `node cc-status.js config --token <TOKEN> [--url <URL>]`: Quick CLI configuration.
+- `node cc-status.js config --token <TOKEN> --url <URL>`: Quick CLI configuration.
 
 ### Troubleshooting
 

@@ -45,7 +45,11 @@ function formatTokens(n) {
 
 async function fetchStatus(config) {
   return new Promise((resolve, reject) => {
-    const url = new URL(config.url || 'http://10.206.32.57:3003/api/usage/token/');
+    if (!config.url) {
+      reject(new Error('API URL is not configured. Run "node cc-status.js setup" first.'));
+      return;
+    }
+    const url = new URL(config.url);
     const options = {
       hostname: url.hostname,
       port: url.port || 80,
@@ -85,8 +89,8 @@ async function fetchStatus(config) {
 
 async function getStatus() {
   const config = readConfig();
-  if (!config || !config.token) {
-    process.stdout.write(`${COLORS.yellow}[CC-StatusLine] run 'setup' to configure${COLORS.reset}\n`);
+  if (!config || !config.token || !config.url) {
+    process.stdout.write(`${COLORS.yellow}[CC-StatusLine] run 'setup' to configure token and url${COLORS.reset}\n`);
     return;
   }
 
@@ -160,14 +164,12 @@ async function handleSetup() {
   const token = await ask(`Enter your API Bearer Token ${config.token ? `(leave empty to keep current)` : ''}: `);
   if (token) config.token = token;
   
-  const url = await ask(`Enter API URL ${config.url ? `(current: ${config.url})` : '(default: http://10.206.32.57:3003/api/usage/token/)'}: `);
+  const url = await ask(`Enter API URL ${config.url ? `(current: ${config.url})` : ''}: `);
   if (url) {
     config.url = url;
-  } else if (!config.url) {
-    config.url = 'http://10.206.32.57:3003/api/usage/token/';
   }
 
-  if (config.token) {
+  if (config.token && config.url) {
     writeConfig(config);
     console.log(`\n${COLORS.green}✓ Configuration saved to ${CONFIG_PATH}${COLORS.reset}`);
     if (fs.existsSync(CACHE_PATH)) fs.unlinkSync(CACHE_PATH);
@@ -176,12 +178,14 @@ async function handleSetup() {
       const test = await fetchStatus(config);
       if (test.code) {
         console.log(`${COLORS.green}✓ Success! Welcome, ${test.data.name}.${COLORS.reset}\n`);
+      } else {
+        console.log(`${COLORS.red}✗ API Error: ${test.message || 'Unknown'}${COLORS.reset}\n`);
       }
     } catch (e) {
       console.log(`${COLORS.yellow}! Saved, but connection failed: ${e.message}${COLORS.reset}\n`);
     }
   } else {
-    console.log(`${COLORS.red}Error: Token is required for setup.${COLORS.reset}\n`);
+    console.log(`${COLORS.red}Error: Both Token and URL are required for setup.${COLORS.reset}\n`);
   }
 }
 

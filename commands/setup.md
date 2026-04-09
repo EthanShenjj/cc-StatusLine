@@ -16,14 +16,14 @@ export CC_SCRIPT_PATH=$(pwd)/cc-status.js
 echo "Detected script path: $CC_SCRIPT_PATH"
 ```
 
-### Step 2: Request Token
-Ask the user for their API Bearer Token.
+### Step 2: Request Configuration
+Ask the user for their API Bearer Token and API URL.
 
 ### Step 3: Run Configuration
 Run the setup command via the CLI:
 
 ```bash
-node cc-status.js config --token <USER_TOKEN>
+node cc-status.js config --token <USER_TOKEN> --url <USER_URL>
 ```
 
 ### Step 4: Verify Integration
