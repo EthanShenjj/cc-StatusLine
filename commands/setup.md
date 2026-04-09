@@ -17,7 +17,7 @@ Ask the user for their API Bearer Token.
 Run the setup command via the CLI:
 
 ```bash
-/Users/ethanshen/.nvm/versions/node/v20.19.5/bin/node /Users/ethanshen/.claude/plugins/CC-StatusLine/cc-status.js config --token <USER_TOKEN>
+node cc-status.js config --token <USER_TOKEN>
 ```
 
 ### Step 4: Verify Integration
@@ -27,7 +27,7 @@ Ensure `~/.claude/settings.json` is updated to include the status bar:
 {
   "statusLine": {
     "type": "command",
-    "command": "/Users/ethanshen/.nvm/versions/node/v20.19.5/bin/node /Users/ethanshen/.claude/plugins/CC-StatusLine/cc-status.js"
+    "command": "node <FULL_PATH_TO_SCRIPT>/cc-status.js"
   }
 }
 ```

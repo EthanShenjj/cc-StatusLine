@@ -1,4 +1,4 @@
-#!/Users/ethanshen/.nvm/versions/node/v20.19.5/bin/node
+#!/usr/bin/env node
 
 const fs = require('fs');
 const http = require('http');

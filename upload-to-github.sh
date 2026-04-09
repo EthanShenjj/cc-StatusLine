@@ -3,9 +3,8 @@
 # CC-StatusLine GitHub Upload Script
 # This script will initialize a git repository and push it to GitHub.
 
-PLUGIN_DIR="$HOME/.claude/plugins/CC-StatusLine"
-
-echo "Changing directory to $PLUGIN_DIR..."
+PLUGIN_DIR="$(cd "$(dirname "$0")" && pwd)"
+echo "Plugin directory is: $PLUGIN_DIR"
 cd "$PLUGIN_DIR" || { echo "Error: Could not find plugin directory."; exit 1; }
 
 # Initialize Git if not already done

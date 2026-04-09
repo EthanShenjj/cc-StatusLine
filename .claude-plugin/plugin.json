@@ -5,6 +5,6 @@
   "author": "Antigravity",
   "statusLine": {
     "type": "command",
-    "command": "/Users/ethanshen/.nvm/versions/node/v20.19.5/bin/node /Users/ethanshen/.claude/plugins/CC-StatusLine/cc-status.js"
+    "command": "node cc-status.js"
   }
 }
