@@ -9,7 +9,7 @@ const readline = require('readline');
 // Using CC-StatusLine for storage paths as well
 const CONFIG_PATH = path.join(os.homedir(), '.CC-StatusLine-config.json');
 const CACHE_PATH = path.join(os.homedir(), '.CC-StatusLine-cache.json');
-const CACHE_TTL = 120 * 1000; // 2 minutes
+const CACHE_TTL = 600 * 1000; // 10 minutes
 
 const COLORS = {
   reset: '\x1b[0m',

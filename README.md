@@ -87,7 +87,7 @@ Once installed, the status line will automatically update every time you run a c
 
 ### Troubleshooting
 
-If the status bar shows `(stale)`, it means the plugin is using cached data because the API could not be reached. The cache refreshes every 2 minutes.
+If the status bar shows `(stale)`, it means the plugin is using cached data because the API could not be reached. The cache refreshes every 10 minutes.
 
 ---
 
