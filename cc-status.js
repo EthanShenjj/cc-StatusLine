@@ -142,7 +142,7 @@ function render(data, isStale = false) {
     `${COLORS.dim}Usage:${COLORS.reset} ${percentColor}${usedPercent}%${COLORS.reset} ` +
     `${COLORS.magenta}|${COLORS.reset} ` +
     `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${availPercent}%${COLORS.reset} ` +
-    `${COLORS.dim}($${balance})${COLORS.reset}${staleMark}\n`
+    `${COLORS.dim}(Est. $${balance})${COLORS.reset}${staleMark}\n`
   );
 }
 
