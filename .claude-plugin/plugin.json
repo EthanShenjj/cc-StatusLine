@@ -1,0 +1,10 @@
+{
+  "name": "CC-StatusLine",
+  "version": "1.0.0",
+  "description": "Custom status bar showing token usage from private API",
+  "author": "Antigravity",
+  "statusLine": {
+    "type": "command",
+    "command": "/Users/ethanshen/.nvm/versions/node/v20.19.5/bin/node /Users/ethanshen/.claude/plugins/CC-StatusLine/cc-status.js"
+  }
+}

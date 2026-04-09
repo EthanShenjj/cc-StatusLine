@@ -1,0 +1,13 @@
+# Local configuration files
+.CC-StatusLine-config.json
+.CC-StatusLine-cache.json
+.cc-status-config.json
+.cc-status-cache.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
