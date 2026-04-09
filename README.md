@@ -14,6 +14,14 @@ A custom status bar plugin for **Claude Code** that displays real-time token usa
 
 ---
 
+## AI-Powered Installation (AI 自动安装)
+
+If you are using **Claude Code**, you can simply paste the following prompt to let Claude handle the entire installation for you:
+
+> "Help me install this status bar plugin: https://github.com/EthanShenjj/cc-StatusLine.git. Please clone it to ~/.claude/plugins/cc-StatusLine, run the setup script, and help me update my ~/.claude/settings.json to enable the status bar."
+
+---
+
 ## Quick Install (快速安装)
 
 Copy and paste this one-liner into your terminal to download and configure the plugin in seconds:
