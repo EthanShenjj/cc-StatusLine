@@ -87,6 +87,39 @@ async function fetchStatus(config) {
   });
 }
 
+
+async function readStdin() {
+  return new Promise((resolve) => {
+    if (process.stdin.isTTY) {
+      resolve(null);
+      return;
+    }
+    let data = '';
+    process.stdin.setEncoding('utf8');
+    const timeout = setTimeout(() => {
+      resolve(null);
+    }, 100); // Short timeout for non-piped usage
+
+    process.stdin.on('data', (chunk) => {
+      data += chunk;
+    });
+
+    process.stdin.on('end', () => {
+      clearTimeout(timeout);
+      try {
+        resolve(JSON.parse(data));
+      } catch (e) {
+        resolve(null);
+      }
+    });
+
+    process.stdin.on('error', () => {
+      clearTimeout(timeout);
+      resolve(null);
+    });
+  });
+}
+
 async function getStatus() {
   const config = readConfig();
   if (!config || !config.token || !config.url) {
@@ -94,56 +127,86 @@ async function getStatus() {
     return;
   }
 
+  // Read stdin in parallel with API call
+  const stdinPromise = readStdin();
+
   let cache = null;
   if (fs.existsSync(CACHE_PATH)) {
     try {
       cache = JSON.parse(fs.readFileSync(CACHE_PATH, 'utf8'));
-      if (Date.now() - cache.timestamp < CACHE_TTL) {
-        render(cache.data);
-        return;
-      }
     } catch (e) {}
   }
 
-  try {
-    const response = await fetchStatus(config);
-    if (response.code && response.data) {
-      fs.writeFileSync(CACHE_PATH, JSON.stringify({
-        timestamp: Date.now(),
-        data: response.data
-      }));
-      render(response.data);
-    } else {
-      process.stdout.write(`${COLORS.red}[CC-StatusLine] API Error: ${response.message || 'Unknown'}${COLORS.reset}\n`);
-    }
-  } catch (e) {
-    if (cache) {
-      render(cache.data, true);
-    } else {
-      process.stdout.write(`${COLORS.red}[CC-StatusLine] Offline: ${e.message}${COLORS.reset}\n`);
+  let apiData = null;
+  let isStale = false;
+
+  if (cache && Date.now() - cache.timestamp < CACHE_TTL) {
+    apiData = cache.data;
+  } else {
+    try {
+      const response = await fetchStatus(config);
+      if (response.code === 0 && response.data) {
+        apiData = response.data;
+        fs.writeFileSync(CACHE_PATH, JSON.stringify({
+          timestamp: Date.now(),
+          data: apiData
+        }));
+      } else if (cache) {
+        apiData = cache.data;
+        isStale = true;
+      }
+    } catch (e) {
+      if (cache) {
+        apiData = cache.data;
+        isStale = true;
+      }
     }
   }
+
+  const sessionData = await stdinPromise;
+  render(apiData, sessionData, isStale);
 }
 
-function render(data, isStale = false) {
-  const { total_used, total_available, total_granted } = data;
-  
-  const usedPercent = total_granted > 0 ? ((total_used / total_granted) * 100).toFixed(1) : '0';
-  const availPercent = total_granted > 0 ? ((total_available / total_granted) * 100).toFixed(1) : '0';
-  const balance = ((total_available / 1000000) * 2).toFixed(2);
-  
-  let percentColor = COLORS.green;
-  if (usedPercent > 80) percentColor = COLORS.yellow;
-  if (usedPercent > 95) percentColor = COLORS.red;
+function render(apiData, sessionData = null, isStale = false) {
+  if (!apiData) {
+    process.stdout.write(`${COLORS.red}[CC-StatusLine] No usage data available${COLORS.reset}\n`);
+    return;
+  }
 
-  const staleMark = isStale ? ` ${COLORS.yellow}(stale)${COLORS.reset}` : '';
-  
-  process.stdout.write(
-    `${COLORS.dim}Usage:${COLORS.reset} ${percentColor}${usedPercent}%${COLORS.reset} ` +
-    `${COLORS.magenta}|${COLORS.reset} ` +
-    `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${availPercent}%${COLORS.reset} ` +
-    `${COLORS.dim}(Est. $${balance})${COLORS.reset}${staleMark}\n`
-  );
+  const { total_used, total_available, total_granted } = apiData;
+  const usedPercent = total_granted > 0 ? ((total_used / total_granted) * 100).toFixed(1) : '0';
+  const balance = ((total_available / 1000000) * 2).toFixed(2);
+
+  // Budget formatting
+  let budgetColor = COLORS.green;
+  if (usedPercent > 80) budgetColor = COLORS.yellow;
+  if (usedPercent > 95) budgetColor = COLORS.red;
+
+  let output = '';
+
+  // 1. Session Context (if available from stdin)
+  if (sessionData && sessionData.context_window) {
+    const { total_input_tokens, total_output_tokens, context_window_size } = sessionData.context_window;
+    const sessionUsed = (total_input_tokens || 0) + (total_output_tokens || 0);
+    const ctxPercent = context_window_size > 0 ? ((sessionUsed / context_window_size) * 100).toFixed(1) : '0';
+    
+    let ctxColor = COLORS.cyan;
+    if (ctxPercent > 70) ctxColor = COLORS.yellow;
+    if (ctxPercent > 90) ctxColor = COLORS.red;
+
+    output += `${COLORS.dim}Ctx:${COLORS.reset} ${ctxColor}${formatTokens(sessionUsed)}/${formatTokens(context_window_size)}${COLORS.reset} ${COLORS.magenta}|${COLORS.reset} `;
+  }
+
+  // 2. Budget Usage
+  output += `${COLORS.dim}Used:${COLORS.reset} ${budgetColor}${formatTokens(total_used)}${COLORS.reset} ${COLORS.magenta}|${COLORS.reset} `;
+  output += `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${formatTokens(total_available)}${COLORS.reset} `;
+  output += `${COLORS.dim}($${balance})${COLORS.reset}`;
+
+  if (isStale) {
+    output += ` ${COLORS.yellow}(stale)${COLORS.reset}`;
+  }
+
+  process.stdout.write(output + '\n');
 }
 
 function ask(question) {

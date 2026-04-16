@@ -7,7 +7,8 @@ A custom status bar plugin for **Claude Code** that displays real-time token usa
 ## Features
 
 - 实时显示 Token 使用情况 (Used vs Granted).
-- 显示剩余可用额度 (Available).
+- **新增：** 实时追踪 Claude 会话上下文 (Ctx) 占用及限制。
+- 显示剩余可用额度 (Available)。
 - 自动颜色提示（接近额度时变为黄色/红色）。
 - 缓存机制，减少 API 请求压力。
 - 交互式配置流程。
@@ -71,7 +72,18 @@ Open `~/.claude/settings.json` and add or update the `statusLine` section:
 ```
 
 > [!IMPORTANT]
-> Make sure the path in `"command"` matches the actual location where you cloned the repository. Using absolute paths starting with `~` or `/Users/YOUR_NAME/` is recommended.
+---
+
+## How to Update (如何更新)
+
+If you have already installed the plugin, you can easily update to the latest version with these commands:
+
+```bash
+cd ~/.claude/plugins/cc-StatusLine
+git pull
+```
+
+The updates will take effect the next time you run a command in Claude Code.
 
 ---
 
