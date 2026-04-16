@@ -167,10 +167,21 @@ async function getStatus() {
 }
 
 function getGhost(percent) {
-  if (percent < 50) return `${COLORS.cyan}ᗝ${COLORS.reset}`; // Happy
-  if (percent < 80) return `${COLORS.yellow}ᗞ${COLORS.reset}`; // Neutral
-  if (percent < 95) return `${COLORS.magenta}ᗣ${COLORS.reset}`; // Worried
-  return `${COLORS.red}ᗟ${COLORS.reset}`; // Depressed
+  // Colors for the buddy
+  const buddyBase = '\x1b[38;5;159m'; // Light Cyan (Ghost-like)
+  
+  let pet = '';
+  if (percent < 50) {
+    pet = `⏝( ·   · )⏝`; // Happy (Dot eyes)
+  } else if (percent < 80) {
+    pet = `⏝( ・   ・ )⏝`; // Neutral (Bigger dots)
+  } else if (percent < 95) {
+    pet = `⏝(；·   · )⏝`; // Worried (Sweating)
+  } else {
+    pet = `⏝( ╥   ╥ )⏝`; // Sad (Crying)
+  }
+  
+  return `${buddyBase}${pet}${COLORS.reset}`;
 }
 
 function render(apiData, sessionData = null, isStale = false) {
