@@ -8,6 +8,7 @@ A custom status bar plugin for **Claude Code** that displays real-time token usa
 
 - 实时显示 Token 使用情况 (Used vs Granted).
 - **新增：** 实时追踪 Claude 会话上下文 (Ctx) 占用及限制。
+- **趣味功能：** 状态栏右侧动态像素小鬼 (Ghost)，表情随上下文占用情况变化。
 - 显示剩余可用额度 (Available)。
 - 自动颜色提示（接近额度时变为黄色/红色）。
 - 缓存机制，减少 API 请求压力。

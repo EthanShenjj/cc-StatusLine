@@ -127,7 +127,6 @@ async function getStatus() {
     return;
   }
 
-  // Read stdin in parallel with API call
   const stdinPromise = readStdin();
 
   let cache = null;
@@ -167,6 +166,13 @@ async function getStatus() {
   render(apiData, sessionData, isStale);
 }
 
+function getGhost(percent) {
+  if (percent < 50) return `${COLORS.cyan}ᗝ${COLORS.reset}`; // Happy
+  if (percent < 80) return `${COLORS.yellow}ᗞ${COLORS.reset}`; // Neutral
+  if (percent < 95) return `${COLORS.magenta}ᗣ${COLORS.reset}`; // Worried
+  return `${COLORS.red}ᗟ${COLORS.reset}`; // Depressed
+}
+
 function render(apiData, sessionData = null, isStale = false) {
   if (!apiData) {
     process.stdout.write(`${COLORS.red}[CC-StatusLine] No usage data available${COLORS.reset}\n`);
@@ -185,14 +191,16 @@ function render(apiData, sessionData = null, isStale = false) {
   let output = '';
 
   // 1. Session Context (if available from stdin)
+  let ctxPercentNum = 0;
   if (sessionData && sessionData.context_window) {
     const { total_input_tokens, total_output_tokens, context_window_size } = sessionData.context_window;
     const sessionUsed = (total_input_tokens || 0) + (total_output_tokens || 0);
-    const ctxPercent = context_window_size > 0 ? ((sessionUsed / context_window_size) * 100).toFixed(1) : '0';
+    ctxPercentNum = context_window_size > 0 ? (sessionUsed / context_window_size) * 100 : 0;
+    const ctxPercentStr = ctxPercentNum.toFixed(1);
     
     let ctxColor = COLORS.cyan;
-    if (ctxPercent > 70) ctxColor = COLORS.yellow;
-    if (ctxPercent > 90) ctxColor = COLORS.red;
+    if (ctxPercentNum > 70) ctxColor = COLORS.yellow;
+    if (ctxPercentNum > 90) ctxColor = COLORS.red;
 
     output += `${COLORS.dim}Ctx:${COLORS.reset} ${ctxColor}${formatTokens(sessionUsed)}/${formatTokens(context_window_size)}${COLORS.reset} ${COLORS.magenta}|${COLORS.reset} `;
   }
@@ -205,6 +213,9 @@ function render(apiData, sessionData = null, isStale = false) {
   if (isStale) {
     output += ` ${COLORS.yellow}(stale)${COLORS.reset}`;
   }
+
+  // 3. Dynamic Ghost (Far Right)
+  output += `  ${getGhost(ctxPercentNum)}`;
 
   process.stdout.write(output + '\n');
 }
