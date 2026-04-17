@@ -167,21 +167,23 @@ async function getStatus() {
 }
 
 function getGhost(percent) {
-  // Colors for the buddy
-  const buddyBase = '\x1b[38;5;159m'; // Light Cyan (Ghost-like)
+  const buddyBase = '\x1b[38;5;242m'; // Dark Gray
+  const reset = COLORS.reset;
   
-  let pet = '';
-  if (percent < 50) {
-    pet = `⏝( ·   · )⏝`; // Happy (Dot eyes)
-  } else if (percent < 80) {
-    pet = `⏝( ・   ・ )⏝`; // Neutral (Bigger dots)
-  } else if (percent < 95) {
-    pet = `⏝(；·   · )⏝`; // Worried (Sweating)
-  } else {
-    pet = `⏝( ╥   ╥ )⏝`; // Sad (Crying)
-  }
-  
-  return `${buddyBase}${pet}${COLORS.reset}`;
+  let eyes = '·     ·';
+  if (percent >= 95) eyes = '╥     ╥';
+  else if (percent >= 80) eyes = '；·   ·';
+  else if (percent >= 50) eyes = '・     ・';
+
+  const body = [
+    `      . _ _ _ .      `,
+    `    .           .    `,
+    `   /   ${eyes}   \\   `,
+    `  |               |  `,
+    `  ~ \` ~ \` ~ \` ~ \` ~  `
+  ];
+
+  return body.map(line => `${buddyBase}${line}${reset}`);
 }
 
 function render(apiData, sessionData = null, isStale = false) {
@@ -194,42 +196,48 @@ function render(apiData, sessionData = null, isStale = false) {
   const usedPercent = total_granted > 0 ? ((total_used / total_granted) * 100).toFixed(1) : '0';
   const balance = ((total_available / 1000000) * 2).toFixed(2);
 
-  // Budget formatting
+  // Budget color logic
   let budgetColor = COLORS.green;
   if (usedPercent > 80) budgetColor = COLORS.yellow;
   if (usedPercent > 95) budgetColor = COLORS.red;
 
-  let output = '';
+  // Stale status
+  const staleInfo = isStale ? ` ${COLORS.yellow}(stale)${COLORS.reset}` : '';
 
-  // 1. Session Context (if available from stdin)
+  // Get ghost lines (5 lines)
   let ctxPercentNum = 0;
+  let sessionInfoLine = '';
   if (sessionData && sessionData.context_window) {
     const { total_input_tokens, total_output_tokens, context_window_size } = sessionData.context_window;
     const sessionUsed = (total_input_tokens || 0) + (total_output_tokens || 0);
     ctxPercentNum = context_window_size > 0 ? (sessionUsed / context_window_size) * 100 : 0;
-    const ctxPercentStr = ctxPercentNum.toFixed(1);
     
     let ctxColor = COLORS.cyan;
     if (ctxPercentNum > 70) ctxColor = COLORS.yellow;
     if (ctxPercentNum > 90) ctxColor = COLORS.red;
 
-    output += `${COLORS.dim}Ctx:${COLORS.reset} ${ctxColor}${formatTokens(sessionUsed)}/${formatTokens(context_window_size)}${COLORS.reset} ${COLORS.magenta}|${COLORS.reset} `;
+    sessionInfoLine = `${COLORS.dim}Ctx:${COLORS.reset} ${ctxColor}${formatTokens(sessionUsed)}/${formatTokens(context_window_size)}${COLORS.reset}`;
+  } else {
+    sessionInfoLine = `${COLORS.dim}Ctx:${COLORS.reset} ${COLORS.green}No Session${COLORS.reset}`;
   }
 
-  // 2. Budget Usage
-  output += `${COLORS.dim}Used:${COLORS.reset} ${budgetColor}${formatTokens(total_used)}${COLORS.reset} ${COLORS.magenta}|${COLORS.reset} `;
-  output += `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${formatTokens(total_available)}${COLORS.reset} `;
-  output += `${COLORS.dim}($${balance})${COLORS.reset}`;
+  const ghostLines = getGhost(ctxPercentNum);
 
-  if (isStale) {
-    output += ` ${COLORS.yellow}(stale)${COLORS.reset}`;
+  // Prepare right-side columns (matched to ghost lines 1-4)
+  const dataLines = [
+    '', // Line 0
+    `${sessionInfoLine}${staleInfo}`, // Line 1
+    `${COLORS.dim}Used:${COLORS.reset} ${budgetColor}${formatTokens(total_used)}${COLORS.reset}`, // Line 2
+    `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${formatTokens(total_available)}${COLORS.reset}`, // Line 3
+    `${COLORS.dim}Est.:${COLORS.reset} ${COLORS.bold}$${balance}${COLORS.reset}` // Line 4
+  ];
+
+  // Output all 5 lines
+  for (let i = 0; i < 5; i++) {
+    process.stdout.write(`${ghostLines[i]}  ${dataLines[i]}\n`);
   }
-
-  // 3. Dynamic Ghost (Far Right)
-  output += `  ${getGhost(ctxPercentNum)}`;
-
-  process.stdout.write(output + '\n');
 }
+
 
 function ask(question) {
   const rl = readline.createInterface({
