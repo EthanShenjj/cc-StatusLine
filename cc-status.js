@@ -170,18 +170,18 @@ function getGhost(percent) {
   const buddyBase = '\x1b[38;5;242m'; // Dark Gray
   const reset = COLORS.reset;
   
-  let eyes = '·   ·';
-  if (percent >= 95) eyes = '╥   ╥';
-  else if (percent >= 80) eyes = '；· ·';
-  else if (percent >= 50) eyes = '・   ・';
-
-  const body = [
-    `   .---.   `,
-    ` /  ${eyes}  \\ `,
-    ` ~ ~ ~ ~   `
-  ];
-
-  return body.map(line => `${buddyBase}${line}${reset}`);
+  let pet = '';
+  if (percent < 50) {
+    pet = `⏝( ·   · )⏝`; // Happy
+  } else if (percent < 80) {
+    pet = `⏝( ・   ・ )⏝`; // Neutral
+  } else if (percent < 95) {
+    pet = `⏝(；·   · )⏝`; // Worried
+  } else {
+    pet = `⏝( ╥   ╥ )⏝`; // Sad
+  }
+  
+  return `${buddyBase}${pet}${reset}`;
 }
 
 function render(apiData, sessionData = null, isStale = false) {
@@ -211,28 +211,18 @@ function render(apiData, sessionData = null, isStale = false) {
     if (ctxPercentNum > 70) ctxColor = COLORS.yellow;
     if (ctxPercentNum > 90) ctxColor = COLORS.red;
 
-    sessionInfo = `${COLORS.dim}Ctx:${COLORS.reset} ${ctxColor}${formatTokens(sessionUsed)}/${formatTokens(context_window_size)}${COLORS.reset}`;
-  } else {
-    sessionInfo = `${COLORS.dim}Ctx:${COLORS.reset} ${COLORS.green}No Session${COLORS.reset}`;
+    sessionInfo = `${COLORS.dim}Ctx:${COLORS.reset} ${ctxColor}${formatTokens(sessionUsed)}/${formatTokens(context_window_size)}${COLORS.reset} ${COLORS.magenta}|${COLORS.reset} `;
   }
 
-  const ghostLines = getGhost(ctxPercentNum);
+  let output = `${sessionInfo}`;
+  output += `${COLORS.dim}Used:${COLORS.reset} ${budgetColor}${formatTokens(total_used)}${COLORS.reset} ${COLORS.magenta}|${COLORS.reset} `;
+  output += `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${formatTokens(total_available)}${COLORS.reset} `;
+  output += `${COLORS.dim}($${balance})${COLORS.reset}`;
+  output += `${staleInfo}  ${getGhost(ctxPercentNum)}`;
 
-  // Consolidated single line for status data
-  const statusLine = `${sessionInfo}${staleInfo} ${COLORS.magenta}|${COLORS.reset} ` +
-                     `${COLORS.dim}Used:${COLORS.reset} ${budgetColor}${formatTokens(total_used)}${COLORS.reset} ${COLORS.magenta}|${COLORS.reset} ` +
-                     `${COLORS.dim}Avail:${COLORS.reset} ${COLORS.green}${formatTokens(total_available)}${COLORS.reset} ` +
-                     `${COLORS.dim}($${balance})${COLORS.reset}`;
-
-  // Strip ANSI codes to calculate visible length for padding
-  const visibleLength = statusLine.replace(/\x1b\[[0-9;]*m/g, '').length;
-  const padding = ' '.repeat(visibleLength);
-
-  // Output 3 lines: Ghost on the right, status text on middle line
-  process.stdout.write(`${padding}  ${ghostLines[0]}\n`);
-  process.stdout.write(`${statusLine}  ${ghostLines[1]}\n`);
-  process.stdout.write(`${padding}  ${ghostLines[2]}\n`);
+  process.stdout.write(output + '\n');
 }
+
 
 
 function ask(question) {
